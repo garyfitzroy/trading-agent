@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  trading-agent:
+    build: .
+    container_name: trading-agent
+    ports:
+      - "8000:8000"
+    environment:
+      APP_NAME: "Trading Agent"
+      ENVIRONMENT: "development"
+      API_HOST: "0.0.0.0"
+      API_PORT: "8000"
+    restart: unless-stopped
