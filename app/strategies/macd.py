@@ -4,20 +4,21 @@ from app.core.strategy import BaseStrategy
 
 
 class MACD(BaseStrategy):
-    def __init__(self, symbol: str, timeframe: str = "1h") -> None:
+    def __init__(self, symbol: str, timeframe: str = "1h", fast: int = 12, slow: int = 26, signal: int = 9) -> None:
         super().__init__(symbol, timeframe)
+        self.fast = fast
+        self.slow = slow
+        self.signal = signal
 
     def on_bar(self, bar) -> None:
-        if len(self.bars) < 26:
-            self.bars.append(bar)
-            return
         self.bars.append(bar)
-        del self.bars[0]
-        closes = [entry.close for entry in self.bars]
-        ema_fast = sum(closes[-12:]) / 12
-        ema_slow = sum(closes[-26:]) / 26
-        macd = ema_fast - ema_slow
-        if macd > 0:
+        if len(self.bars) < self.slow:
+            return
+
+        macd_line, signal_line, hist = self.macd(self.fast, self.slow, self.signal)
+        if hist > 0:
             self.buy()
-        else:
+        elif hist < 0:
             self.sell()
+        else:
+            self.flat()
